@@ -10334,10 +10334,10 @@ return jQuery;
 
 exports.__esModule = true;
 var $ = __webpack_require__(0);
-var Game = (function () {
-    function Game() {
+var Grid = (function () {
+    function Grid() {
     }
-    Game.prototype.create_grid = function () {
+    Grid.prototype.create_grid = function () {
         var grid = [];
         var row = 0;
         var column = 0;
@@ -10348,18 +10348,70 @@ var Game = (function () {
         }
         return grid;
     };
-    Game.prototype.render = function () {
+    Grid.prototype.render = function () {
         var grid = this.create_grid();
         $.map(grid, function (variable, index) {
             $(".container").append("<div class='square' id='row-" + grid[index][0] +
                 "-col-" + grid[index][1] + "'</div>");
         });
+        return grid;
+    };
+    return Grid;
+}());
+var Bomb = (function () {
+    function Bomb() {
+        this.coordinates = this.create_bomb();
+    }
+    Object.defineProperty(Bomb.prototype, "position", {
+        get: function () {
+            return this.coordinates;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Bomb.prototype.create_bomb = function () {
+        var position = [];
+        position = [Math.floor(Math.random() * (9 - 0)) + 0,
+            Math.floor(Math.random() * (9 - 0)) + 0];
+        return position;
+    };
+    return Bomb;
+}());
+var Game = (function () {
+    function Game() {
+        var new_grid = new Grid;
+        console.log(new_grid);
+        this.grid = new_grid.create_grid();
+        console.log(this.grid);
+    }
+    Game.prototype.place_bombs = function () {
+        console.log("in place_bombs");
+        var bombs = [];
+        var i = 0;
+        var j = 0;
+        while (bombs.length <= 10) {
+            var bomb = new Bomb;
+            bombs.push(bomb.position);
+        }
+        console.log(bombs);
+        console.log("this.grid" + this.grid);
+        for (i = 0; i < this.grid.length; i++) {
+            for (j = 0; j < bombs.length; j++) {
+                console.log("i: " + this.grid[i]);
+                console.log("j " + bombs[j]);
+                if (JSON.stringify(this.grid[i]) === JSON.stringify(bombs[j])) {
+                    $("#row-" + this.grid[i][0] + "-col-" + this.grid[i][1]).addClass("bomb");
+                }
+            }
+        }
     };
     return Game;
 }());
 $(function () {
-    var game = new Game();
-    game.render();
+    var grid = new Grid;
+    grid.render();
+    var game = new Game;
+    game.place_bombs();
 });
 
 
