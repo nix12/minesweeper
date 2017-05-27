@@ -1,0 +1,25 @@
+.container {
+  width: 125px;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row; }
+
+.square {
+  height: 12.5px;
+  width: 12.5px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center; }
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+/*# sourceMappingURL=style.css.map */
