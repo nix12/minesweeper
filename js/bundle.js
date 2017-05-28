@@ -10353,54 +10353,100 @@ var Grid = (function () {
         $.map(grid, function (variable, index) {
             $(".container").append("<div class='square' id='row-" + grid[index][0] +
                 "-col-" + grid[index][1] + "'</div>");
+            $(".square").addClass("cover");
         });
-        return grid;
     };
     return Grid;
 }());
-var Bomb = (function () {
-    function Bomb() {
-        this.coordinates = this.create_bomb();
+var Mine = (function () {
+    function Mine() {
+        this.coordinates = this.create_mine();
     }
-    Object.defineProperty(Bomb.prototype, "position", {
+    Object.defineProperty(Mine.prototype, "position", {
         get: function () {
             return this.coordinates;
         },
         enumerable: true,
         configurable: true
     });
-    Bomb.prototype.create_bomb = function () {
+    Mine.prototype.create_mine = function () {
         var position = [];
         position = [Math.floor(Math.random() * (9 - 0)) + 0,
             Math.floor(Math.random() * (9 - 0)) + 0];
         return position;
     };
-    return Bomb;
+    return Mine;
 }());
 var Game = (function () {
     function Game() {
         var new_grid = new Grid;
-        console.log(new_grid);
         this.grid = new_grid.create_grid();
-        console.log(this.grid);
     }
-    Game.prototype.place_bombs = function () {
-        console.log("in place_bombs");
-        var bombs = [];
+    Game.prototype.place_mines = function () {
+        var mines = [];
         var i = 0;
         var j = 0;
-        while (bombs.length <= 10) {
-            var bomb = new Bomb;
-            bombs.push(bomb.position);
+        while (mines.length <= 10) {
+            var mine = new Mine;
+            mines.push(mine.position);
         }
-        console.log(bombs);
-        console.log("this.grid" + this.grid);
         for (i = 0; i < this.grid.length; i++) {
-            for (j = 0; j < bombs.length; j++) {
-                console.log("i: " + this.grid[i]);
-                console.log("j " + bombs[j]);
-                if (JSON.stringify(this.grid[i]) === JSON.stringify(bombs[j])) {
-                    $("#row-" + this.grid[i][0] + "-col-" + this.grid[i][1]).addClass("bomb");
+            for (j = 0; j < mines.length; j++) {
+                if (JSON.stringify(this.grid[i]) === JSON.stringify(mines[j])) {
+                    $("#row-" + this.grid[i][0] + "-col-" + this.grid[i][1]).addClass("mine");
+                    $("#row-" + this.grid[i][0] + "-col-" + this.grid[i][1]).html("x");
+                }
+            }
+        }
+    };
+    Game.prototype.check_neighbors = function () {
+        var i = 0;
+        console.log("grid-outside: " + this.grid);
+        for (i = 0; i < this.grid.length; i++) {
+            console.log("grid-inside: " + this.grid);
+            var $location = $("#row-" + this.grid[i][0] + "-col-" +
+                this.grid[i][1]);
+            if ($location.hasClass("mine")) {
+                var mine_count = 1;
+                if ($("#row-" + (this.grid[i][0] + 1) + "-col-" +
+                    this.grid[i][1]).hasClass("mine")) {
+                    $("#row-" + (this.grid[i][0] + 1) + "-col-" +
+                        this.grid[i][1]).html("x");
+                    mine_count++;
+                }
+                else {
+                    $("#row-" + (this.grid[i][0] + 1) + "-col-" +
+                        this.grid[i][1]).html(JSON.stringify(mine_count)).addClass("points");
+                }
+                if ($("#row-" + (this.grid[i][0] - 1) + "-col-" +
+                    this.grid[i][1]).hasClass("mine")) {
+                    $("#row-" + (this.grid[i][0] - 1) + "-col-" +
+                        this.grid[i][1]).html("x");
+                    mine_count++;
+                }
+                else {
+                    $("#row-" + (this.grid[i][0] - 1) + "-col-" +
+                        this.grid[i][1]).html(JSON.stringify(mine_count)).addClass("points");
+                }
+                if ($("#row-" + this.grid[i][0] + "-col-" +
+                    (this.grid[i][1] + 1)).hasClass("mine")) {
+                    $("#row-" + this.grid[i][0] + "-col-" +
+                        (this.grid[i][1] + 1)).html("x");
+                    mine_count++;
+                }
+                else {
+                    $("#row-" + this.grid[i][0] + "-col-" +
+                        (this.grid[i][1] + 1)).html(JSON.stringify(mine_count)).addClass("points");
+                }
+                if ($("#row-" + this.grid[i][0] + "-col-" +
+                    (this.grid[i][1] - 1)).hasClass("mine")) {
+                    $("#row-" + this.grid[i][0] + "-col-" +
+                        (this.grid[i][1] - 1)).html("x");
+                    mine_count++;
+                }
+                else {
+                    $("#row-" + this.grid[i][0] + "-col-" +
+                        (this.grid[i][1] - 1)).html(JSON.stringify(mine_count)).addClass("points");
                 }
             }
         }
@@ -10408,10 +10454,30 @@ var Game = (function () {
     return Game;
 }());
 $(function () {
+    $(document).on("contextmenu", ".square", function (e) {
+        e.preventDefault();
+        $(this).addClass("flag");
+    });
+    $(".square").on("click", function () {
+        $(this).removeClass("cover");
+        if ($(this).hasClass("mine")) {
+            alert("You lose the game");
+        }
+    });
+    $("div").attr('unselectable', 'on')
+        .css({ '-moz-user-select': '-moz-none',
+        '-moz-user-select': 'none',
+        '-o-user-select': 'none',
+        '-khtml-user-select': 'none',
+        '-webkit-user-select': 'none',
+        '-ms-user-select': 'none',
+        'user-select': 'none'
+    }).bind('selectstart', function () { return false; });
     var grid = new Grid;
     grid.render();
     var game = new Game;
-    game.place_bombs();
+    game.place_mines();
+    game.check_neighbors();
 });
 
 
