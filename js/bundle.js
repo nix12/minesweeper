@@ -10341,8 +10341,8 @@ var Grid = (function () {
         var grid = [];
         var row = 0;
         var column = 0;
-        for (row = 0; row <= 9; row++) {
-            for (column = 0; column <= 9; column++) {
+        for (row = 0; row <= 8; row++) {
+            for (column = 0; column <= 8; column++) {
                 grid.push([row, column]);
             }
         }
@@ -10371,8 +10371,8 @@ var Mine = (function () {
     });
     Mine.prototype.create_mine = function () {
         var position = [];
-        position = [Math.floor(Math.random() * (9 - 0)) + 0,
-            Math.floor(Math.random() * (9 - 0)) + 0];
+        position = [Math.floor(Math.random() * (8 - 0)) + 0,
+            Math.floor(Math.random() * (8 - 0)) + 0];
         return position;
     };
     return Mine;
@@ -10386,7 +10386,7 @@ var Game = (function () {
         var mines = [];
         var i = 0;
         var j = 0;
-        while (mines.length <= 10) {
+        while (mines.length <= 9) {
             var mine = new Mine;
             mines.push(mine.position);
         }
@@ -10399,11 +10399,9 @@ var Game = (function () {
             }
         }
     };
-    Game.prototype.check_neighbors = function () {
+    Game.prototype.add_points = function () {
         var i = 0;
-        console.log("grid-outside: " + this.grid);
         for (i = 0; i < this.grid.length; i++) {
-            console.log("grid-inside: " + this.grid);
             var $location = $("#row-" + this.grid[i][0] + "-col-" +
                 this.grid[i][1]);
             if ($location.hasClass("mine")) {
@@ -10451,6 +10449,36 @@ var Game = (function () {
             }
         }
     };
+    Game.prototype.flood_fill = function (x, y) {
+        var i = 0;
+        var n = 0;
+        var adjacent = [[1, 0], [-1, 0], [0, 1], [0, -1],
+            [1, 1], [-1, -1], [-1, 1], [1, -1]];
+        var neighbors = [];
+        for (i = 0; i < adjacent.length; i++) {
+            for (n = 0; n < this.grid.length; n++) {
+                var row = adjacent[i][0] + this.grid[n][0];
+                var column = adjacent[i][1] + this.grid[n][1];
+                neighbors.push([row, column]);
+            }
+        }
+        return neighbors;
+    };
+    Game.prototype.uncover = function (x, y) {
+        var neighbors = this.flood_fill(x, y);
+        var j = 0;
+        console.log("in uncover");
+        for (j = 0; j < neighbors.length; j++) {
+            var row = neighbors[j][0];
+            var column = neighbors[j][1];
+            console.log("in uncover for");
+            if (neighbors[j][0] >= 0 && neighbors[j][0] <= 8 &&
+                neighbors[j][1] >= 0 && neighbors[j][1] <= 8) {
+                $("#row-" + row + "-col-" + column).removeClass("cover");
+                this.flood_fill(row, column);
+            }
+        }
+    };
     return Game;
 }());
 $(function () {
@@ -10458,11 +10486,10 @@ $(function () {
         e.preventDefault();
         $(this).addClass("flag");
     });
-    $(".square").on("click", function () {
-        $(this).removeClass("cover");
-        if ($(this).hasClass("mine")) {
-            alert("You lose the game");
-        }
+    $(".container").on("click", ".square", function () {
+        var current = [parseInt(this.id[4]), parseInt(this.id[10])];
+        game.uncover(current[0], current[1]);
+        console.log("click");
     });
     $("div").attr('unselectable', 'on')
         .css({ '-moz-user-select': '-moz-none',
@@ -10474,10 +10501,10 @@ $(function () {
         'user-select': 'none'
     }).bind('selectstart', function () { return false; });
     var grid = new Grid;
-    grid.render();
     var game = new Game;
+    grid.render();
     game.place_mines();
-    game.check_neighbors();
+    game.add_points();
 });
 
 
